@@ -4,4 +4,7 @@ nul
 *.mp4
 *.mov
 *.avi
-res/frames/
+
+# Documentation and resources
+docs/
+res/

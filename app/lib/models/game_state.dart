@@ -247,36 +247,28 @@ class GameState extends ChangeNotifier {
       // Remove the target block too
       _board[targetRow][targetColumn] = null;
 
-      // Place merged block at the target position
+      // Apply gravity first to fill gaps
+      _applyGravity();
+
+      // Find landing position for merged block
+      int landingRow = _findLandingRow(targetColumn);
+      if (landingRow < 0) landingRow = 0;
+
+      // Place merged block at the landing position
       final newBlock = Block(
         value: newValue,
-        row: targetRow,
+        row: landingRow,
         column: targetColumn,
       );
-      _board[targetRow][targetColumn] = newBlock;
+      _board[landingRow][targetColumn] = newBlock;
 
-      notifyListeners();
-
-      // Apply gravity after merge
-      await Future.delayed(const Duration(milliseconds: 50));
-      _applyGravity();
       notifyListeners();
 
       // Wait for gravity animation
       await Future.delayed(Duration(milliseconds: GameConstants.gravityDuration));
 
-      // Find the new position after gravity
-      int newRow = targetRow;
-      for (int r = GameConstants.rows - 1; r >= 0; r--) {
-        final b = _board[r][targetColumn];
-        if (b != null && b.value == newValue) {
-          newRow = r;
-          break;
-        }
-      }
-
       // Recursively check for more merges at the new position
-      await _checkAndMerge(newRow, targetColumn);
+      await _checkAndMerge(landingRow, targetColumn);
     }
   }
 
