@@ -1,0 +1,7 @@
+nul
+
+# Large video files
+*.mp4
+*.mov
+*.avi
+res/frames/
