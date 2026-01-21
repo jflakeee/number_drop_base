@@ -247,8 +247,16 @@ class GameState extends ChangeNotifier {
       // Remove the target block too
       _board[targetRow][targetColumn] = null;
 
-      // Apply gravity first to fill gaps
+      notifyListeners();
+
+      // Apply gravity to all columns that had merged blocks
+      final affectedColumns = sameBlocks.map((p) => p.column).toSet();
       _applyGravity();
+
+      notifyListeners();
+
+      // Wait for gravity animation
+      await Future.delayed(Duration(milliseconds: GameConstants.gravityDuration));
 
       // Find landing position for merged block
       int landingRow = _findLandingRow(targetColumn);
@@ -264,11 +272,24 @@ class GameState extends ChangeNotifier {
 
       notifyListeners();
 
-      // Wait for gravity animation
-      await Future.delayed(Duration(milliseconds: GameConstants.gravityDuration));
+      // Small delay for the new block to appear
+      await Future.delayed(const Duration(milliseconds: 50));
 
       // Recursively check for more merges at the new position
       await _checkAndMerge(landingRow, targetColumn);
+
+      // Also check adjacent columns for chain reactions
+      for (final col in affectedColumns) {
+        if (col != targetColumn) {
+          // Find the lowest block in this column and check for merges
+          for (int r = GameConstants.rows - 1; r >= 0; r--) {
+            if (_board[r][col] != null) {
+              await _checkAndMerge(r, col);
+              break;
+            }
+          }
+        }
+      }
     }
   }
 
