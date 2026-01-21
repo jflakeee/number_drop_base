@@ -335,22 +335,22 @@ class _ComboPopupState extends State<ComboPopup>
         return Transform.scale(
           scale: _scaleAnimation.value,
           child: Opacity(
-            opacity: _fadeAnimation.value,
+            opacity: _fadeAnimation.value * 0.7, // Semi-transparent
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    GameColors.comboRed,
-                    GameColors.comboGold,
+                    GameColors.comboRed.withOpacity(0.8),
+                    GameColors.comboGold.withOpacity(0.8),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
-                    color: GameColors.comboRed.withOpacity(0.6),
-                    blurRadius: 20,
-                    spreadRadius: 4,
+                    color: GameColors.comboRed.withOpacity(0.3),
+                    blurRadius: 10,
+                    spreadRadius: 1,
                   ),
                 ],
               ),
@@ -360,16 +360,16 @@ class _ComboPopupState extends State<ComboPopup>
                   const Icon(
                     Icons.flash_on,
                     color: Colors.white,
-                    size: 28,
+                    size: 16,
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 4),
                   Text(
                     'COMBO x${widget.comboCount}',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 24,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
+                      letterSpacing: 1,
                     ),
                   ),
                 ],
