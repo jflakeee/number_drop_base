@@ -208,23 +208,57 @@ class GameState extends ChangeNotifier {
       final targetRow = row;
       final targetColumn = column;
 
-      // Create merge animation data for blocks moving to target
-      _isMerging = true;
-      _mergeAnimations = [];
+      // Separate blocks into below-merges and other merges
+      final belowBlocks = <_Position>[];
+      final otherBlocks = <_Position>[];
 
       for (final pos in sameBlocks) {
         if (pos.row != targetRow || pos.column != targetColumn) {
-          final movingBlock = _board[pos.row][pos.column];
-          if (movingBlock != null) {
-            _mergeAnimations.add(MergeAnimationData(
-              id: movingBlock.id,
-              value: movingBlock.value,
-              fromRow: pos.row,
-              fromColumn: pos.column,
-              toRow: targetRow,
-              toColumn: targetColumn,
-            ));
+          // Check if this block is directly below in the same column
+          if (pos.column == targetColumn && pos.row > targetRow) {
+            belowBlocks.add(pos);
+          } else {
+            otherBlocks.add(pos);
           }
+        }
+      }
+
+      // Create merge animation data
+      _isMerging = true;
+      _mergeAnimations = [];
+
+      // Add other blocks (move toward target normally)
+      for (final pos in otherBlocks) {
+        final movingBlock = _board[pos.row][pos.column];
+        if (movingBlock != null) {
+          _mergeAnimations.add(MergeAnimationData(
+            id: movingBlock.id,
+            value: movingBlock.value,
+            fromRow: pos.row,
+            fromColumn: pos.column,
+            toRow: targetRow,
+            toColumn: targetColumn,
+            isBelowMerge: false,
+          ));
+        }
+      }
+
+      // Add below blocks (move up halfway, then disappear)
+      for (final pos in belowBlocks) {
+        final movingBlock = _board[pos.row][pos.column];
+        if (movingBlock != null) {
+          // Target is halfway between the block's position and the target
+          final halfwayRow = (pos.row + targetRow) / 2;
+          _mergeAnimations.add(MergeAnimationData(
+            id: movingBlock.id,
+            value: movingBlock.value,
+            fromRow: pos.row,
+            fromColumn: pos.column,
+            toRow: targetRow,
+            toColumn: targetColumn,
+            isBelowMerge: true,
+            mergedValue: newValue,
+          ));
         }
       }
 
@@ -233,6 +267,12 @@ class GameState extends ChangeNotifier {
         if (pos.row != targetRow || pos.column != targetColumn) {
           _board[pos.row][pos.column] = null;
         }
+      }
+
+      // For below merges, update the target block value immediately
+      // (it will show the merged value while falling)
+      if (belowBlocks.isNotEmpty) {
+        _board[targetRow][targetColumn] = block.copyWith(value: newValue);
       }
 
       notifyListeners();
@@ -244,7 +284,7 @@ class GameState extends ChangeNotifier {
       _isMerging = false;
       _mergeAnimations = [];
 
-      // Remove the target block too
+      // Remove the target block
       _board[targetRow][targetColumn] = null;
 
       notifyListeners();
@@ -463,6 +503,8 @@ class MergeAnimationData {
   final int fromColumn;
   final int toRow;
   final int toColumn;
+  final bool isBelowMerge; // True if this block is below the dropped block
+  final int? mergedValue; // The value after merge (for the falling block)
 
   MergeAnimationData({
     required this.id,
@@ -471,5 +513,7 @@ class MergeAnimationData {
     required this.fromColumn,
     required this.toRow,
     required this.toColumn,
+    this.isBelowMerge = false,
+    this.mergedValue,
   });
 }

@@ -369,6 +369,55 @@ class _AnimatedGameBoardState extends State<AnimatedGameBoard>
     }
 
     return gameState.mergeAnimations.map((anim) {
+      // For below merges: move up halfway, then fade out
+      if (anim.isBelowMerge) {
+        return TweenAnimationBuilder<double>(
+          key: ValueKey('merge_below_${anim.id}'),
+          tween: Tween<double>(begin: 0.0, end: 1.0),
+          duration: Duration(milliseconds: GameConstants.mergeMoveDuration),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, child) {
+            final startX = anim.fromColumn * cellWidth + (cellWidth - cellSize) / 2;
+            final startY = anim.fromRow * cellHeight + (cellHeight - cellSize) / 2;
+            final endX = anim.toColumn * cellWidth + (cellWidth - cellSize) / 2;
+            final endY = anim.toRow * cellHeight + (cellHeight - cellSize) / 2;
+
+            // Move only halfway (0 to 0.5 of the distance)
+            final moveProgress = value < 0.5 ? value * 2 : 1.0;
+            final halfwayY = startY + (endY - startY) * 0.5;
+            final currentX = startX;
+            final currentY = startY + (halfwayY - startY) * moveProgress;
+
+            // Fade out after 50% of animation
+            final opacity = value < 0.5 ? 1.0 : 1.0 - ((value - 0.5) * 2);
+
+            // Scale down when fading
+            final scale = value < 0.5 ? 1.0 : 1.0 - ((value - 0.5) * 0.5);
+
+            return Positioned(
+              left: currentX,
+              top: currentY,
+              child: Opacity(
+                opacity: opacity.clamp(0.0, 1.0),
+                child: Transform.scale(
+                  scale: scale.clamp(0.5, 1.0),
+                  child: AnimatedBlockWidget(
+                    block: Block(
+                      value: anim.value,
+                      row: anim.toRow,
+                      column: anim.toColumn,
+                      id: anim.id,
+                    ),
+                    size: cellSize - 4,
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      }
+
+      // Normal merge animation (blocks move toward target)
       return TweenAnimationBuilder<double>(
         key: ValueKey('merge_${anim.id}'),
         tween: Tween<double>(begin: 0.0, end: 1.0),
