@@ -82,7 +82,7 @@ class AudioService {
     if (!_bgmEnabled) return;
     try {
       await _bgmPlayer.setVolume(_bgmVolume);
-      await _bgmPlayer.play(AssetSource('audio/bgm.$_audioExt'));
+      await _bgmPlayer.play(_getAudioSource('bgm.$_audioExt'));
     } catch (e) {
       // Audio file might not exist yet
     }
@@ -144,11 +144,21 @@ class AudioService {
     _bgmPlayer.setVolume(_bgmVolume);
   }
 
+  Source _getAudioSource(String filename) {
+    if (kIsWeb) {
+      // Web: use UrlSource with relative path to web/assets/audio/
+      return UrlSource('assets/audio/$filename');
+    } else {
+      // Mobile: use AssetSource from Flutter assets
+      return AssetSource('audio/$filename');
+    }
+  }
+
   Future<void> _playSound(String filename) async {
     try {
       await _sfxPlayer.setVolume(_sfxVolume);
       await _sfxPlayer.setPlaybackRate(1.0);
-      await _sfxPlayer.play(AssetSource('audio/$filename'));
+      await _sfxPlayer.play(_getAudioSource(filename));
     } catch (e) {
       // Audio file might not exist yet
     }
@@ -158,7 +168,7 @@ class AudioService {
     try {
       await _sfxPlayer.setVolume(_sfxVolume);
       await _sfxPlayer.setPlaybackRate(pitch);
-      await _sfxPlayer.play(AssetSource('audio/$filename'));
+      await _sfxPlayer.play(_getAudioSource(filename));
     } catch (e) {
       // Audio file might not exist yet
     }
