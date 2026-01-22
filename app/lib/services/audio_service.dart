@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:audioplayers/audioplayers.dart';
+import 'web_audio_stub.dart' if (dart.library.html) 'web_audio_impl.dart' as web_audio;
 
 /// Service for playing game sounds
 class AudioService {
@@ -29,8 +30,10 @@ class AudioService {
 
   /// Initialize audio service
   Future<void> init() async {
-    await _sfxPlayer.setReleaseMode(ReleaseMode.stop);
-    await _bgmPlayer.setReleaseMode(ReleaseMode.loop);
+    if (!kIsWeb) {
+      await _sfxPlayer.setReleaseMode(ReleaseMode.stop);
+      await _bgmPlayer.setReleaseMode(ReleaseMode.loop);
+    }
   }
 
   /// Play drop sound effect
@@ -80,28 +83,44 @@ class AudioService {
   /// Play background music
   Future<void> playBGM() async {
     if (!_bgmEnabled) return;
-    try {
-      await _bgmPlayer.setVolume(_bgmVolume);
-      await _bgmPlayer.play(_getAudioSource('bgm.$_audioExt'));
-    } catch (e) {
-      // Audio file might not exist yet
+    if (kIsWeb) {
+      web_audio.playWebBGM('assets/audio/bgm.$_audioExt', _bgmVolume);
+    } else {
+      try {
+        await _bgmPlayer.setVolume(_bgmVolume);
+        await _bgmPlayer.play(_getAudioSource('bgm.$_audioExt'));
+      } catch (e) {
+        // Audio file might not exist yet
+      }
     }
   }
 
   /// Stop background music
   Future<void> stopBGM() async {
-    await _bgmPlayer.stop();
+    if (kIsWeb) {
+      web_audio.stopWebBGM();
+    } else {
+      await _bgmPlayer.stop();
+    }
   }
 
   /// Pause background music
   Future<void> pauseBGM() async {
-    await _bgmPlayer.pause();
+    if (kIsWeb) {
+      web_audio.pauseWebBGM();
+    } else {
+      await _bgmPlayer.pause();
+    }
   }
 
   /// Resume background music
   Future<void> resumeBGM() async {
     if (_bgmEnabled) {
-      await _bgmPlayer.resume();
+      if (kIsWeb) {
+        web_audio.resumeWebBGM();
+      } else {
+        await _bgmPlayer.resume();
+      }
     }
   }
 
@@ -141,7 +160,11 @@ class AudioService {
   /// Set BGM volume
   void setBGMVolume(double volume) {
     _bgmVolume = volume.clamp(0.0, 1.0);
-    _bgmPlayer.setVolume(_bgmVolume);
+    if (kIsWeb) {
+      web_audio.setWebBGMVolume(_bgmVolume);
+    } else {
+      _bgmPlayer.setVolume(_bgmVolume);
+    }
   }
 
   Source _getAudioSource(String filename) {
@@ -155,22 +178,30 @@ class AudioService {
   }
 
   Future<void> _playSound(String filename) async {
-    try {
-      await _sfxPlayer.setVolume(_sfxVolume);
-      await _sfxPlayer.setPlaybackRate(1.0);
-      await _sfxPlayer.play(_getAudioSource(filename));
-    } catch (e) {
-      // Audio file might not exist yet
+    if (kIsWeb) {
+      web_audio.playWebAudio('assets/audio/$filename', _sfxVolume, 1.0);
+    } else {
+      try {
+        await _sfxPlayer.setVolume(_sfxVolume);
+        await _sfxPlayer.setPlaybackRate(1.0);
+        await _sfxPlayer.play(_getAudioSource(filename));
+      } catch (e) {
+        // Audio file might not exist yet
+      }
     }
   }
 
   Future<void> _playSoundWithPitch(String filename, double pitch) async {
-    try {
-      await _sfxPlayer.setVolume(_sfxVolume);
-      await _sfxPlayer.setPlaybackRate(pitch);
-      await _sfxPlayer.play(_getAudioSource(filename));
-    } catch (e) {
-      // Audio file might not exist yet
+    if (kIsWeb) {
+      web_audio.playWebAudio('assets/audio/$filename', _sfxVolume, pitch);
+    } else {
+      try {
+        await _sfxPlayer.setVolume(_sfxVolume);
+        await _sfxPlayer.setPlaybackRate(pitch);
+        await _sfxPlayer.play(_getAudioSource(filename));
+      } catch (e) {
+        // Audio file might not exist yet
+      }
     }
   }
 
