@@ -6,9 +6,9 @@ html.AudioElement? _bgmElement;
 
 void playWebAudio(String path, double volume, double playbackRate) {
   try {
-    // Use absolute path for web
-    final absolutePath = path.startsWith('/') ? path : '/$path';
-    final audio = html.AudioElement(absolutePath);
+    // Use relative path for GitHub Pages compatibility
+    final relativePath = path.startsWith('/') ? path.substring(1) : path;
+    final audio = html.AudioElement(relativePath);
     audio.volume = volume;
     audio.playbackRate = playbackRate;
     audio.play();
@@ -20,8 +20,9 @@ void playWebAudio(String path, double volume, double playbackRate) {
 void playWebBGM(String path, double volume) {
   try {
     stopWebBGM();
-    final absolutePath = path.startsWith('/') ? path : '/$path';
-    _bgmElement = html.AudioElement(absolutePath);
+    // Use relative path for GitHub Pages compatibility
+    final relativePath = path.startsWith('/') ? path.substring(1) : path;
+    _bgmElement = html.AudioElement(relativePath);
     _bgmElement!.volume = volume;
     _bgmElement!.loop = true;
     _bgmElement!.play();
