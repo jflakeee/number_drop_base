@@ -168,12 +168,14 @@ class _GameScreenState extends State<GameScreen> {
       body: SafeArea(
         child: Consumer<GameState>(
           builder: (context, gameState, child) {
-            // Save data when game over
+            // Save data and auto-submit score when game over
             if (gameState.isGameOver && !_hasShownGameOver) {
               _hasShownGameOver = true;
               _scoreSubmitted = false;
               _saveGameData(gameState);
               AudioService.instance.playGameOver();
+              // Auto-submit score to ranking
+              _submitScore(gameState);
             }
             if (!gameState.isGameOver) {
               _hasShownGameOver = false;
@@ -561,66 +563,45 @@ class _GameScreenState extends State<GameScreen> {
                   fontSize: 12,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
-              // Submit score button
-              if (!_scoreSubmitted)
-                ElevatedButton.icon(
-                  onPressed:
-                      _isSubmittingScore ? null : () => _submitScore(gameState),
-                  icon: _isSubmittingScore
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Icon(
-                          Icons.leaderboard,
-                          size: 18,
-                        ),
-                  label: Text(
-                    _isSubmittingScore ? 'SUBMITTING...' : 'SUBMIT SCORE',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: GameColors.accent,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                    disabledBackgroundColor: GameColors.accent.withOpacity(0.5),
-                  ),
-                )
-              else
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.green, width: 1),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.check_circle, color: Colors.green, size: 18),
-                      SizedBox(width: 8),
-                      Text(
-                        'Score Submitted!',
-                        style: TextStyle(
-                          color: Colors.green,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
+              // Auto-submit score status
+              if (_isSubmittingScore)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        color: Colors.white54,
+                        strokeWidth: 2,
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Submitting to ranking...',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.6),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                )
+              else if (_scoreSubmitted)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.check_circle, color: Colors.green, size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Ranking Updated!',
+                      style: TextStyle(
+                        color: Colors.green.withOpacity(0.8),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
 
               const SizedBox(height: 24),
