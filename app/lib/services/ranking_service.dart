@@ -83,22 +83,30 @@ class RankingService {
     RankingType type = RankingType.all,
     int limit = 100,
   }) {
-    Query<Map<String, dynamic>> query =
-        _rankingsRef.orderBy('score', descending: true).limit(limit);
+    Query<Map<String, dynamic>> query;
 
-    // Apply time filter for daily/weekly
+    // Apply time filter for daily/weekly (filter must come before orderBy for range queries)
     if (type == RankingType.daily) {
       final today = DateTime.now();
       final startOfDay = DateTime(today.year, today.month, today.day);
-      query = query.where('updatedAt',
-          isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay));
+      query = _rankingsRef
+          .where('updatedAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .orderBy('updatedAt', descending: true)
+          .orderBy('score', descending: true)
+          .limit(limit);
     } else if (type == RankingType.weekly) {
       final now = DateTime.now();
       final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
       final startOfWeekDay =
           DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
-      query = query.where('updatedAt',
-          isGreaterThanOrEqualTo: Timestamp.fromDate(startOfWeekDay));
+      query = _rankingsRef
+          .where('updatedAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfWeekDay))
+          .orderBy('updatedAt', descending: true)
+          .orderBy('score', descending: true)
+          .limit(limit);
+    } else {
+      // All time - no filter needed
+      query = _rankingsRef.orderBy('score', descending: true).limit(limit);
     }
 
     return query.snapshots().map((snapshot) {
@@ -112,22 +120,30 @@ class RankingService {
     int limit = 100,
   }) async {
     try {
-      Query<Map<String, dynamic>> query =
-          _rankingsRef.orderBy('score', descending: true).limit(limit);
+      Query<Map<String, dynamic>> query;
 
-      // Apply time filter for daily/weekly
+      // Apply time filter for daily/weekly (filter must come before orderBy for range queries)
       if (type == RankingType.daily) {
         final today = DateTime.now();
         final startOfDay = DateTime(today.year, today.month, today.day);
-        query = query.where('updatedAt',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay));
+        query = _rankingsRef
+            .where('updatedAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+            .orderBy('updatedAt', descending: true)
+            .orderBy('score', descending: true)
+            .limit(limit);
       } else if (type == RankingType.weekly) {
         final now = DateTime.now();
         final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
         final startOfWeekDay =
             DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
-        query = query.where('updatedAt',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfWeekDay));
+        query = _rankingsRef
+            .where('updatedAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfWeekDay))
+            .orderBy('updatedAt', descending: true)
+            .orderBy('score', descending: true)
+            .limit(limit);
+      } else {
+        // All time - no filter needed
+        query = _rankingsRef.orderBy('score', descending: true).limit(limit);
       }
 
       final snapshot = await query.get();
