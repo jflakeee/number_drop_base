@@ -8,23 +8,27 @@ import 'auth_service.dart';
 class PendingScore {
   final int score;
   final int highestBlock;
+  final int? gameSeed;
   final DateTime timestamp;
 
   const PendingScore({
     required this.score,
     required this.highestBlock,
+    this.gameSeed,
     required this.timestamp,
   });
 
   Map<String, dynamic> toJson() => {
         'score': score,
         'highestBlock': highestBlock,
+        'gameSeed': gameSeed,
         'timestamp': timestamp.toIso8601String(),
       };
 
   factory PendingScore.fromJson(Map<String, dynamic> json) => PendingScore(
         score: json['score'] as int,
         highestBlock: json['highestBlock'] as int,
+        gameSeed: json['gameSeed'] as int?,
         timestamp: DateTime.parse(json['timestamp'] as String),
       );
 }
@@ -46,6 +50,7 @@ class OfflineQueueService {
   Future<void> queueScore({
     required int score,
     required int highestBlock,
+    int? gameSeed,
   }) async {
     if (_prefs == null) await init();
 
@@ -61,10 +66,11 @@ class OfflineQueueService {
       final newScore = PendingScore(
         score: score,
         highestBlock: highestBlock,
+        gameSeed: gameSeed,
         timestamp: DateTime.now(),
       );
       await _savePendingScores([newScore]);
-      debugPrint('Score queued for offline submission: $score');
+      debugPrint('Score queued for offline submission: $score (seed: $gameSeed)');
     }
   }
 
@@ -119,6 +125,7 @@ class OfflineQueueService {
         final success = await RankingService.instance.submitScore(
           score: pending.score,
           highestBlock: pending.highestBlock,
+          gameSeed: pending.gameSeed,
         );
         if (success) {
           submitted++;

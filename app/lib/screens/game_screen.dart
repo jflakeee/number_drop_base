@@ -112,6 +112,7 @@ class _GameScreenState extends State<GameScreen> {
       final success = await RankingService.instance.submitScore(
         score: gameState.score,
         highestBlock: highestBlock,
+        gameSeed: gameState.gameSeed,
       );
 
       if (mounted) {
@@ -551,6 +552,14 @@ class _GameScreenState extends State<GameScreen> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Seed: ${gameState.gameSeed}',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.5),
+                  fontSize: 12,
+                ),
               ),
               const SizedBox(height: 24),
 

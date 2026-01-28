@@ -7,6 +7,7 @@ class RankingEntry {
   final String? photoUrl;
   final int score;
   final int highestBlock;
+  final int? gameSeed; // Seed for reproducible game verification
   final DateTime updatedAt;
   final String platform;
 
@@ -16,6 +17,7 @@ class RankingEntry {
     this.photoUrl,
     required this.score,
     required this.highestBlock,
+    this.gameSeed,
     required this.updatedAt,
     required this.platform,
   });
@@ -28,6 +30,7 @@ class RankingEntry {
       photoUrl: data['photoUrl'],
       score: data['score'] ?? 0,
       highestBlock: data['highestBlock'] ?? 0,
+      gameSeed: data['gameSeed'],
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       platform: data['platform'] ?? 'unknown',
     );
@@ -40,6 +43,7 @@ class RankingEntry {
       'photoUrl': photoUrl,
       'score': score,
       'highestBlock': highestBlock,
+      'gameSeed': gameSeed,
       'updatedAt': FieldValue.serverTimestamp(),
       'platform': platform,
     };
@@ -51,6 +55,7 @@ class RankingEntry {
     String? photoUrl,
     int? score,
     int? highestBlock,
+    int? gameSeed,
     DateTime? updatedAt,
     String? platform,
   }) {
@@ -60,6 +65,7 @@ class RankingEntry {
       photoUrl: photoUrl ?? this.photoUrl,
       score: score ?? this.score,
       highestBlock: highestBlock ?? this.highestBlock,
+      gameSeed: gameSeed ?? this.gameSeed,
       updatedAt: updatedAt ?? this.updatedAt,
       platform: platform ?? this.platform,
     );

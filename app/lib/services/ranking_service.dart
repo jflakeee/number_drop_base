@@ -24,9 +24,11 @@ class RankingService {
 
   /// Submit score to ranking
   /// Returns true if score was submitted successfully
+  /// [gameSeed] - Optional seed for game verification
   Future<bool> submitScore({
     required int score,
     required int highestBlock,
+    int? gameSeed,
   }) async {
     final auth = AuthService.instance;
     if (!auth.isSignedIn) {
@@ -45,6 +47,7 @@ class RankingService {
         photoUrl: photoUrl,
         score: score,
         highestBlock: highestBlock,
+        gameSeed: gameSeed,
         updatedAt: DateTime.now(),
         platform: kIsWeb ? 'web' : 'mobile',
       );

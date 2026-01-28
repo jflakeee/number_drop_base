@@ -43,8 +43,9 @@ class GameState extends ChangeNotifier {
   GameState? _previousState;
   bool _canUndo = false;
 
-  // Random generator
-  final Random _random = Random();
+  // Random generator with seed support
+  late Random _random;
+  int _gameSeed = 0;
 
   // Getters
   List<List<Block?>> get board => _board;
@@ -68,12 +69,31 @@ class GameState extends ChangeNotifier {
           ? GameConstants.targetBlocks[_currentTargetIndex]
           : GameConstants.targetBlocks.last;
 
+  /// Current game seed for reproducible block sequence
+  int get gameSeed => _gameSeed;
+
+  /// Generate daily challenge seed (same for all players on the same day)
+  static int getDailySeed() {
+    final now = DateTime.now();
+    return now.year * 10000 + now.month * 100 + now.day;
+  }
+
+  /// Generate a random seed
+  static int generateRandomSeed() {
+    return DateTime.now().millisecondsSinceEpoch % 100000000;
+  }
+
   GameState() {
     _initializeGame();
   }
 
   /// Initialize or reset the game
-  void _initializeGame() {
+  /// [seed] - Optional seed for reproducible block sequence. If null, generates random seed.
+  void _initializeGame({int? seed}) {
+    // Initialize seed and random generator
+    _gameSeed = seed ?? generateRandomSeed();
+    _random = Random(_gameSeed);
+
     _board = List.generate(
       GameConstants.rows,
       (_) => List.filled(GameConstants.columns, null),
@@ -96,8 +116,21 @@ class GameState extends ChangeNotifier {
   }
 
   /// Start a new game
-  void newGame() {
-    _initializeGame();
+  /// [seed] - Optional seed for reproducible block sequence
+  void newGame({int? seed}) {
+    _initializeGame(seed: seed);
+    notifyListeners();
+  }
+
+  /// Start a daily challenge game (same seed for everyone today)
+  void newDailyChallenge() {
+    _initializeGame(seed: getDailySeed());
+    notifyListeners();
+  }
+
+  /// Start a game with a specific seed (for challenges/sharing)
+  void newGameWithSeed(int seed) {
+    _initializeGame(seed: seed);
     notifyListeners();
   }
 
