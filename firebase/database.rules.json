@@ -1,0 +1,26 @@
+{
+  "rules": {
+    "live_battles": {
+      "$battleId": {
+        // Anyone can read live battle scores
+        ".read": true,
+
+        "$odiserId": {
+          // Only the user can write their own score
+          ".write": "auth != null && auth.uid == $odiserId",
+          ".validate": "newData.hasChildren(['score', 'highestBlock', 'isFinished'])",
+
+          "score": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000"
+          },
+          "highestBlock": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "isFinished": {
+            ".validate": "newData.isBoolean()"
+          }
+        }
+      }
+    }
+  }
+}

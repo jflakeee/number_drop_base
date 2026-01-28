@@ -39,6 +39,7 @@ class DefaultFirebaseOptions {
     authDomain: 'number-drop-7145d.firebaseapp.com',
     storageBucket: 'number-drop-7145d.firebasestorage.app',
     measurementId: 'G-DPE95RRHWN',
+    databaseURL: 'https://number-drop-7145d-default-rtdb.firebaseio.com',
   );
 
   // Android configuration (add from Firebase Console if needed)
@@ -48,6 +49,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '300353188801',
     projectId: 'number-drop-7145d',
     storageBucket: 'number-drop-7145d.firebasestorage.app',
+    databaseURL: 'https://number-drop-7145d-default-rtdb.firebaseio.com',
   );
 
   // iOS configuration (add from Firebase Console if needed)
@@ -57,6 +59,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '300353188801',
     projectId: 'number-drop-7145d',
     storageBucket: 'number-drop-7145d.firebasestorage.app',
+    databaseURL: 'https://number-drop-7145d-default-rtdb.firebaseio.com',
     iosBundleId: 'com.example.numberDropClone',
   );
 
@@ -67,6 +70,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '300353188801',
     projectId: 'number-drop-7145d',
     storageBucket: 'number-drop-7145d.firebasestorage.app',
+    databaseURL: 'https://number-drop-7145d-default-rtdb.firebaseio.com',
     iosBundleId: 'com.example.numberDropClone',
   );
 
@@ -77,5 +81,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '300353188801',
     projectId: 'number-drop-7145d',
     storageBucket: 'number-drop-7145d.firebasestorage.app',
+    databaseURL: 'https://number-drop-7145d-default-rtdb.firebaseio.com',
   );
 }

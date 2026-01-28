@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Rankings collection (userId = document ID)
+    match /rankings/{odiserId} {
+      allow read: if true;
+      // Create: logged in + own document only
+      allow create: if request.auth != null
+        && odiserId == request.auth.uid
+        && request.resource.data.score >= 0
+        && request.resource.data.score <= 10000000;
+      // Update: own document + score must be higher
+      allow update: if request.auth != null
+        && odiserId == request.auth.uid
+        && request.resource.data.score > resource.data.score;
+      allow delete: if false;
+    }
+
+    // User profiles collection
+    match /users/{odiserId} {
+      allow read: if true;
+      allow create, update: if request.auth != null
+        && odiserId == request.auth.uid
+        && request.resource.data.displayName.size() >= 2
+        && request.resource.data.displayName.size() <= 20;
+      allow delete: if false;
+    }
+
+    // Battles collection
+    match /battles/{battleId} {
+      // Anyone can read battles
+      allow read: if true;
+
+      // Create: must be logged in
+      allow create: if request.auth != null
+        && request.resource.data.players[request.auth.uid] != null;
+
+      // Update: must be a player in the battle
+      allow update: if request.auth != null
+        && (resource.data.players[request.auth.uid] != null
+            || request.resource.data.players[request.auth.uid] != null);
+
+      // Delete: only creator when waiting
+      allow delete: if request.auth != null
+        && resource.data.status == 'waiting'
+        && resource.data.players.keys()[0] == request.auth.uid;
+    }
+  }
+}

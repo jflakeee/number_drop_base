@@ -8,6 +8,7 @@ import 'game_screen.dart';
 import 'settings_screen.dart';
 import 'shop_screen.dart';
 import 'ranking_screen.dart';
+import 'matchmaking_screen.dart';
 
 /// Main menu screen
 class MainMenuScreen extends StatefulWidget {
@@ -350,7 +351,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
 
   Widget _buildBottomButtons() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -363,6 +364,18 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                 : Colors.white38,
             onTap: _userData.canClaimDailyBonus ? _claimDailyBonus : null,
             badge: _userData.canClaimDailyBonus ? '!' : null,
+          ),
+
+          // Battle (1v1)
+          _buildBottomButton(
+            icon: Icons.sports_kabaddi,
+            label: 'BATTLE',
+            color: Colors.orange,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const MatchmakingScreen()),
+              );
+            },
           ),
 
           // Leaderboard
