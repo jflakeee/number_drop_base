@@ -198,7 +198,7 @@ class RankingService {
           }
         }
         // Check if user is in the time-filtered rankings
-        final isInRankings = rankings.any((e) => e.odiserId == auth.userId);
+        final isInRankings = rankings.any((e) => e.userId == auth.userId);
         return isInRankings ? position : null;
       }
     } catch (e) {
