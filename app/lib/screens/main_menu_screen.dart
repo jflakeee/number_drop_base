@@ -3,9 +3,11 @@ import '../config/colors.dart';
 import '../config/constants.dart';
 import '../models/user_data.dart';
 import '../services/storage_service.dart';
+import '../services/offline_queue_service.dart';
 import 'game_screen.dart';
 import 'settings_screen.dart';
 import 'shop_screen.dart';
+import 'ranking_screen.dart';
 
 /// Main menu screen
 class MainMenuScreen extends StatefulWidget {
@@ -18,11 +20,13 @@ class MainMenuScreen extends StatefulWidget {
 class _MainMenuScreenState extends State<MainMenuScreen> {
   UserData _userData = UserData();
   bool _isLoading = true;
+  bool _hasPendingScores = false;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _checkPendingScores();
   }
 
   Future<void> _loadUserData() async {
@@ -31,6 +35,13 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       _userData = userData;
       _isLoading = false;
     });
+  }
+
+  Future<void> _checkPendingScores() async {
+    final hasPending = await OfflineQueueService.instance.hasPendingScores();
+    if (mounted) {
+      setState(() => _hasPendingScores = hasPending);
+    }
   }
 
   Future<void> _claimDailyBonus() async {
@@ -354,14 +365,17 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             badge: _userData.canClaimDailyBonus ? '!' : null,
           ),
 
-          // Leaderboard (placeholder)
+          // Leaderboard
           _buildBottomButton(
             icon: Icons.leaderboard,
             label: 'RANK',
             color: Colors.white70,
             onTap: () {
-              // TODO: Show leaderboard
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const RankingScreen()),
+              ).then((_) => _checkPendingScores());
             },
+            badge: _hasPendingScores ? '!' : null,
           ),
 
           // Shop

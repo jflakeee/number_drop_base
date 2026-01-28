@@ -5,6 +5,9 @@ import '../config/constants.dart';
 import '../models/game_state.dart';
 import '../services/storage_service.dart';
 import '../services/audio_service.dart';
+import '../services/auth_service.dart';
+import '../services/ranking_service.dart';
+import '../services/offline_queue_service.dart';
 import '../widgets/animated_game_board.dart';
 import '../widgets/score_popup.dart';
 import '../widgets/next_block_preview.dart';
@@ -22,6 +25,8 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends State<GameScreen> {
   bool _hammerMode = false;
   bool _hasShownGameOver = false;
+  bool _isSubmittingScore = false;
+  bool _scoreSubmitted = false;
 
   @override
   void initState() {
@@ -68,6 +73,92 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  Future<void> _handleSignIn() async {
+    final user = await AuthService.instance.signInWithGoogle();
+    if (user != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Signed in successfully!'),
+          backgroundColor: GameColors.primary,
+        ),
+      );
+      setState(() {});
+    }
+  }
+
+  Future<void> _submitScore(GameState gameState) async {
+    if (_isSubmittingScore) return;
+
+    if (!AuthService.instance.isSignedIn) {
+      await _handleSignIn();
+      if (!AuthService.instance.isSignedIn) return;
+    }
+
+    setState(() => _isSubmittingScore = true);
+
+    try {
+      // Find highest block on the board
+      int highestBlock = 2;
+      for (int row = 0; row < GameConstants.rows; row++) {
+        for (int col = 0; col < GameConstants.columns; col++) {
+          final value = gameState.grid[row][col];
+          if (value > highestBlock) {
+            highestBlock = value;
+          }
+        }
+      }
+
+      final success = await RankingService.instance.submitScore(
+        score: gameState.score,
+        highestBlock: highestBlock,
+      );
+
+      if (mounted) {
+        if (success) {
+          setState(() => _scoreSubmitted = true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Score submitted to ranking!'),
+              backgroundColor: GameColors.primary,
+            ),
+          );
+        } else {
+          // Check if score was queued for offline submission
+          final hasPending =
+              await OfflineQueueService.instance.hasPendingScores();
+          if (hasPending) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Score saved. Will submit when online.'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Your existing score is higher!'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to submit score: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+
+    if (mounted) {
+      setState(() => _isSubmittingScore = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,11 +169,13 @@ class _GameScreenState extends State<GameScreen> {
             // Save data when game over
             if (gameState.isGameOver && !_hasShownGameOver) {
               _hasShownGameOver = true;
+              _scoreSubmitted = false;
               _saveGameData(gameState);
               AudioService.instance.playGameOver();
             }
             if (!gameState.isGameOver) {
               _hasShownGameOver = false;
+              _scoreSubmitted = false;
             }
 
             return Stack(
@@ -410,6 +503,8 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Widget _buildGameOverOverlay(BuildContext context, GameState gameState) {
+    final isSignedIn = AuthService.instance.isSignedIn;
+
     return Container(
       color: Colors.black.withOpacity(0.8),
       child: Center(
@@ -458,10 +553,77 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
+
+              // Submit score button
+              if (!_scoreSubmitted)
+                ElevatedButton.icon(
+                  onPressed:
+                      _isSubmittingScore ? null : () => _submitScore(gameState),
+                  icon: _isSubmittingScore
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Icon(
+                          isSignedIn ? Icons.leaderboard : Icons.login,
+                          size: 18,
+                        ),
+                  label: Text(
+                    _isSubmittingScore
+                        ? 'SUBMITTING...'
+                        : isSignedIn
+                            ? 'SUBMIT SCORE'
+                            : 'SIGN IN & SUBMIT',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: GameColors.accent,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    disabledBackgroundColor: GameColors.accent.withOpacity(0.5),
+                  ),
+                )
+              else
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.green, width: 1),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.green, size: 18),
+                      SizedBox(width: 8),
+                      Text(
+                        'Score Submitted!',
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
                   _hasShownGameOver = false;
+                  _scoreSubmitted = false;
                   gameState.newGame();
                 },
                 style: ElevatedButton.styleFrom(
