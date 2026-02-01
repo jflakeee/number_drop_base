@@ -189,10 +189,10 @@ class _AnimatedGameBoardState extends State<AnimatedGameBoard>
               child: Container(
                 decoration: BoxDecoration(
                   color: GameColors.boardBackground,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   border: widget.hammerMode
                       ? Border.all(color: Colors.red.withOpacity(0.5), width: 2)
-                      : null,
+                      : Border.all(color: const Color(0xFF2A3A4A), width: 2),
                 ),
                 child: Stack(
                   children: [

@@ -208,34 +208,40 @@ class _GameScreenState extends State<GameScreen> {
                     // Top bar with score and coins
                     const ScoreDisplay(),
 
-                    const SizedBox(height: 10),
-
                     // Next block preview
                     const NextBlockPreview(),
 
-                    const SizedBox(height: 10),
-
-                    // Game board
+                    // Game board - benchmark exact (60px horizontal padding on 360px screen)
                     Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Center(
-                          child: AspectRatio(
-                            aspectRatio: 5 / 8,
-                            child: AnimatedGameBoard(
-                              hammerMode: _hammerMode,
-                              onHammerUse: (row, col) =>
-                                  _useHammer(gameState, row, col),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          // Calculate padding to match benchmark proportions
+                          // Benchmark: ~60px padding on 360px screen = 16.67%
+                          final horizontalPadding = constraints.maxWidth * 0.083;
+                          return Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: horizontalPadding,
+                              vertical: 0,
                             ),
-                          ),
-                        ),
+                            child: Center(
+                              child: AspectRatio(
+                                aspectRatio: 5 / 8,
+                                child: AnimatedGameBoard(
+                                  hammerMode: _hammerMode,
+                                  onHammerUse: (row, col) =>
+                                      _useHammer(gameState, row, col),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
 
-                    // Bottom controls
+                    // Bottom controls (benchmark style)
                     _buildBottomControls(context, gameState),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                   ],
                 ),
 
@@ -312,11 +318,11 @@ class _GameScreenState extends State<GameScreen> {
 
   Widget _buildBottomControls(BuildContext context, GameState gameState) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // Piggy bank with progress
+          // Piggy bank with progress (benchmark style)
           _buildPiggyBank(gameState),
 
           // AD video button (+coins)
@@ -325,11 +331,11 @@ class _GameScreenState extends State<GameScreen> {
             iconColor: Colors.white,
             backgroundColor: const Color(0xFF3D5A80),
             label: 'AD',
-            coinAmount: 109,
+            coinAmount: 111,
             showPlus: true,
             onTap: () {
-              gameState.addCoins(109);
-              gameState.addToPiggyBank(109);
+              gameState.addCoins(111);
+              gameState.addToPiggyBank(111);
               AudioService.instance.playCoin();
             },
           ),
@@ -360,7 +366,7 @@ class _GameScreenState extends State<GameScreen> {
           // Hammer button
           _buildToolButton(
             icon: Icons.hardware,
-            iconColor: Colors.white,
+            iconColor: Colors.blueGrey[300]!,
             backgroundColor: const Color(0xFF3D5A80),
             coinAmount: GameConstants.hammerCost,
             isActive: _hammerMode,
@@ -372,47 +378,67 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Widget _buildPiggyBank(GameState gameState) {
-    final progress = gameState.piggyBankCoins / GameConstants.mascotGoalCoins;
     return GestureDetector(
       onTap: () {
         if (gameState.piggyBankCoins >= GameConstants.mascotGoalCoins) {
           gameState.collectPiggyBank();
         }
       },
-      child: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          color: const Color(0xFF3D5A80),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('🐷', style: TextStyle(fontSize: 24)),
-            const SizedBox(height: 2),
-            SizedBox(
-              width: 50,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: progress.clamp(0.0, 1.0),
-                  backgroundColor: Colors.grey[700],
-                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFD700)),
-                  minHeight: 6,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Golden piggy image (benchmark exact: ~70x60)
+          Container(
+            width: 70,
+            height: 60,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFFFFE135), Color(0xFFFFB800), Color(0xFFFF8C00)],
+              ),
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.orange.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Text('🐷', style: TextStyle(fontSize: 36)),
+            ),
+          ),
+          const SizedBox(height: 6),
+          // Progress text with coin icon (benchmark style)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 14,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFD700),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFFB8860B), width: 1),
+                ),
+                child: const Center(
+                  child: Text('😊', style: TextStyle(fontSize: 8)),
                 ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              '${gameState.piggyBankCoins}/${GameConstants.mascotGoalCoins}',
-              style: const TextStyle(
-                color: Color(0xFFFFD700),
-                fontSize: 8,
-                fontWeight: FontWeight.bold,
+              const SizedBox(width: 4),
+              Text(
+                '${gameState.piggyBankCoins} / ${GameConstants.mascotGoalCoins}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -429,41 +455,43 @@ class _GameScreenState extends State<GameScreen> {
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(12),
-          border: isActive
-              ? Border.all(color: GameColors.coinYellow, width: 2)
-              : null,
-          boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: GameColors.coinYellow.withOpacity(0.4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                ]
-              : null,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Stack(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Icon container (benchmark exact: ~64x56)
+          Container(
+            width: 64,
+            height: 56,
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(14),
+              border: isActive
+                  ? Border.all(color: GameColors.coinYellow, width: 2)
+                  : null,
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: GameColors.coinYellow.withOpacity(0.4),
+                        blurRadius: 8,
+                        spreadRadius: 1,
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Stack(
               alignment: Alignment.center,
               children: [
                 Icon(
                   icon,
                   color: iconColor,
-                  size: 28,
+                  size: 36,
                 ),
                 if (label != null)
                   Positioned(
-                    bottom: 0,
-                    right: 0,
+                    top: 4,
+                    right: 4,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                       decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(4),
@@ -472,7 +500,7 @@ class _GameScreenState extends State<GameScreen> {
                         label,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 8,
+                          fontSize: 9,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -480,37 +508,39 @@ class _GameScreenState extends State<GameScreen> {
                   ),
               ],
             ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 14,
-                  height: 14,
-                  decoration: const BoxDecoration(
-                    color: GameColors.coinYellow,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Center(
-                    child: Text(
-                      '😊',
-                      style: TextStyle(fontSize: 8),
-                    ),
+          ),
+          const SizedBox(height: 6),
+          // Coin amount display (benchmark style)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 14,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFD700),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFFB8860B), width: 1),
+                ),
+                child: const Center(
+                  child: Text(
+                    '😊',
+                    style: TextStyle(fontSize: 8),
                   ),
                 ),
-                const SizedBox(width: 3),
-                Text(
-                  showPlus ? '+$coinAmount' : '$coinAmount',
-                  style: const TextStyle(
-                    color: GameColors.coinYellow,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                showPlus ? '+$coinAmount' : '$coinAmount',
+                style: const TextStyle(
+                  color: GameColors.coinYellow,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

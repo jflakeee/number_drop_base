@@ -3,9 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../config/colors.dart';
 import '../models/game_state.dart';
-import '../screens/ranking_screen.dart';
 
-/// Widget displaying score, high score, coins, and action buttons
+/// Widget displaying score, high score, coins, and action buttons (benchmark exact style)
 class ScoreDisplay extends StatelessWidget {
   const ScoreDisplay({super.key});
 
@@ -14,71 +13,89 @@ class ScoreDisplay extends StatelessWidget {
     return Consumer<GameState>(
       builder: (context, gameState, child) {
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
           child: Column(
             children: [
-              // Top row: coins and action buttons
+              // Row 1: Coins (left), Score (center), Ranking (right)
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Coins
+                  // Coins - blue pill shape (benchmark: ~100x36)
                   _buildCoinDisplay(gameState.coins),
 
                   const Spacer(),
 
-                  // Action buttons
-                  _buildIconButton(
-                    Icons.pause,
-                    onTap: () => gameState.pause(),
+                  // Score area (center) - benchmark style
+                  Column(
+                    children: [
+                      // High score with crown
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('👑', style: TextStyle(fontSize: 14)),
+                          const SizedBox(width: 4),
+                          Text(
+                            _formatNumber(gameState.highScore),
+                            style: const TextStyle(
+                              color: Colors.white60,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      // Current score (large) - benchmark: 36px bold
+                      Text(
+                        _formatNumber(gameState.score),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                          height: 1.1,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 3),
-                  _buildIconButton(
-                    Icons.leaderboard,
-                    onTap: () {
-                      gameState.pause();
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const RankingScreen()),
-                      ).then((_) => gameState.resume());
-                    },
-                  ),
-                  const SizedBox(width: 3),
-                  _buildIconButton(
-                    Icons.undo,
-                    onTap: gameState.canUndo ? () => gameState.undo() : () {},
-                  ),
-                  const SizedBox(width: 3),
-                  _buildIconButton(
-                    Icons.share,
-                    onTap: () {
-                      Share.share(
-                        'I scored ${_formatNumber(gameState.score)} points in Number Drop! Can you beat me? 🎮\nSeed: ${gameState.gameSeed}',
-                      );
-                    },
-                  ),
+
+                  const Spacer(),
+
+                  // World ranking (right) - benchmark style
+                  _buildRankingDisplay(),
                 ],
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
 
-              // Score row
+              // Row 2: Action buttons - benchmark exact layout
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // High score
-                  const Icon(Icons.emoji_events, color: GameColors.coinYellow, size: 14),
-                  const SizedBox(width: 2),
-                  Text(
-                    _formatNumber(gameState.highScore),
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  // Left: Undo button
+                  _buildSquareButton(
+                    icon: Icons.undo,
+                    onTap: gameState.canUndo ? () => gameState.undo() : () {},
                   ),
-                  const SizedBox(width: 12),
-                  // Current score
-                  Text(
-                    _formatNumber(gameState.score),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  const SizedBox(width: 8),
+                  // Left: Invite button with label
+                  _buildLabelButton(
+                    icon: Icons.person_add,
+                    label: '초대',
+                    onTap: () {
+                      Share.share('Number Drop 게임에 도전해보세요! 🎮');
+                    },
+                  ),
+
+                  const Spacer(),
+
+                  // Right: Premium button with label
+                  _buildLabelButton(
+                    icon: Icons.card_giftcard,
+                    label: '프리미엄',
+                    onTap: () {},
+                  ),
+                  const SizedBox(width: 8),
+                  // Right: Menu button with red dot
+                  _buildMenuButton(
+                    onTap: () => gameState.pause(),
                   ),
                 ],
               ),
@@ -91,31 +108,89 @@ class ScoreDisplay extends StatelessWidget {
 
   Widget _buildCoinDisplay(int coins) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      height: 36,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
       decoration: BoxDecoration(
-        color: const Color(0xFF3D5A80),
-        borderRadius: BorderRadius.circular(12),
+        color: const Color(0xFF4A9FE8),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFF2D6AB3), width: 2),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Yellow coin circle
+          Container(
+            width: 22,
+            height: 22,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFD700),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFB8860B), width: 1),
+            ),
+            child: const Center(
+              child: Text('😊', style: TextStyle(fontSize: 12)),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            _formatNumber(coins),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(width: 4),
+          // Plus button
+          Container(
+            width: 18,
+            height: 18,
+            decoration: BoxDecoration(
+              color: const Color(0xFF7EC8F8),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.add, color: Colors.white, size: 14),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRankingDisplay() {
+    return Container(
+      height: 36,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+      decoration: BoxDecoration(
+        color: const Color(0xFF4A9FE8),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFF2D6AB3), width: 2),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 14,
-            height: 14,
+            width: 22,
+            height: 22,
             decoration: const BoxDecoration(
-              color: GameColors.coinYellow,
+              color: Color(0xFF90EE90),
               shape: BoxShape.circle,
             ),
-            child: const Center(
-              child: Text('😊', style: TextStyle(fontSize: 8)),
+            child: const Icon(Icons.public, color: Colors.white, size: 16),
+          ),
+          const SizedBox(width: 4),
+          const Text(
+            '#',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(width: 3),
-          Text(
-            _formatNumber(coins),
-            style: const TextStyle(
+          const Text(
+            '4058421',
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 12,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -124,19 +199,81 @@ class ScoreDisplay extends StatelessWidget {
     );
   }
 
-  Widget _buildIconButton(IconData icon, {required VoidCallback onTap}) {
+  Widget _buildSquareButton({required IconData icon, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(5),
+        width: 44,
+        height: 40,
         decoration: BoxDecoration(
           color: const Color(0xFF3D5A80),
-          borderRadius: BorderRadius.circular(5),
+          borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(
-          icon,
-          color: Colors.white,
-          size: 14,
+        child: Icon(icon, color: Colors.white, size: 24),
+      ),
+    );
+  }
+
+  Widget _buildLabelButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 40,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF3D5A80),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: Colors.white, size: 20),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuButton({required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 44,
+        height: 40,
+        decoration: BoxDecoration(
+          color: const Color(0xFF3D5A80),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            const Icon(Icons.menu, color: Colors.white, size: 24),
+            Positioned(
+              right: 8,
+              top: 8,
+              child: Container(
+                width: 10,
+                height: 10,
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -145,9 +282,12 @@ class ScoreDisplay extends StatelessWidget {
   String _formatNumber(int number) {
     if (number >= 1000000) {
       return '${(number / 1000000).toStringAsFixed(1)}M';
-    } else if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(number % 1000 == 0 ? 0 : 1)}K';
+    } else if (number >= 10000) {
+      return '${(number / 1000).toStringAsFixed(0)}K';
     }
-    return number.toString();
+    return number.toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]},',
+    );
   }
 }

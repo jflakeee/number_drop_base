@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/game_state.dart';
 import 'block_widget.dart';
 
-/// Widget showing current and next block preview (matching original game style)
+/// Widget showing current and next block preview (benchmark exact style)
 class NextBlockPreview extends StatelessWidget {
   const NextBlockPreview({super.key});
 
@@ -12,27 +12,28 @@ class NextBlockPreview extends StatelessWidget {
     return Consumer<GameState>(
       builder: (context, gameState, child) {
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          height: 90,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              // Current block (larger)
+              // Current block (larger) - benchmark: ~80x80
               if (gameState.currentBlock != null)
                 BlockWidget(
                   block: gameState.currentBlock!,
-                  size: 70,
+                  size: 80,
                 ),
 
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
 
-              // Next block (smaller, aligned to bottom)
+              // Next block (smaller) - benchmark: ~50x50
               if (gameState.nextBlock != null)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
+                  padding: const EdgeInsets.only(bottom: 6),
                   child: BlockWidget(
                     block: gameState.nextBlock!,
-                    size: 40,
+                    size: 50,
                   ),
                 ),
             ],

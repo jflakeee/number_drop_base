@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 /// Game color definitions for each block value
 class GameColors {
-  // Background colors
-  static const Color background = Color(0xFF2D2D2D);
-  static const Color boardBackground = Color(0xFF1A1A1A);
-  static const Color columnDivider = Color(0xFF3D3D3D);
+  // Background colors (benchmark exact)
+  static const Color background = Color(0xFF1E2432);
+  static const Color boardBackground = Color(0xFF161B26);
+  static const Color columnDivider = Color(0xFF2A3544);
 
   // UI colors
   static const Color primary = Color(0xFF2196F3);
