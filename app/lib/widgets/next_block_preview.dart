@@ -12,28 +12,28 @@ class NextBlockPreview extends StatelessWidget {
     return Consumer<GameState>(
       builder: (context, gameState, child) {
         return Container(
-          height: 90,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          height: 60,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              // Current block (larger) - benchmark: ~80x80
+              // Current block (larger)
               if (gameState.currentBlock != null)
                 BlockWidget(
                   block: gameState.currentBlock!,
-                  size: 80,
+                  size: 52,
                 ),
 
-              const SizedBox(width: 10),
+              const SizedBox(width: 6),
 
-              // Next block (smaller) - benchmark: ~50x50
+              // Next block (smaller)
               if (gameState.nextBlock != null)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
+                  padding: const EdgeInsets.only(bottom: 4),
                   child: BlockWidget(
                     block: gameState.nextBlock!,
-                    size: 50,
+                    size: 32,
                   ),
                 ),
             ],

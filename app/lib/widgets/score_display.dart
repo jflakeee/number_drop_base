@@ -13,91 +13,58 @@ class ScoreDisplay extends StatelessWidget {
     return Consumer<GameState>(
       builder: (context, gameState, child) {
         return Container(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-          child: Column(
+          padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+          child: Row(
             children: [
-              // Row 1: Coins (left), Score (center), Ranking (right)
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              // Left: Coins + Undo
+              _buildCoinDisplay(gameState.coins),
+              const SizedBox(width: 4),
+              _buildMiniButton(
+                icon: Icons.undo,
+                onTap: gameState.canUndo ? () => gameState.undo() : () {},
+              ),
+
+              const Spacer(),
+
+              // Center: Score
+              Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Coins - blue pill shape (benchmark: ~100x36)
-                  _buildCoinDisplay(gameState.coins),
-
-                  const Spacer(),
-
-                  // Score area (center) - benchmark style
-                  Column(
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      // High score with crown
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text('👑', style: TextStyle(fontSize: 14)),
-                          const SizedBox(width: 4),
-                          Text(
-                            _formatNumber(gameState.highScore),
-                            style: const TextStyle(
-                              color: Colors.white60,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      // Current score (large) - benchmark: 36px bold
+                      const Text('👑', style: TextStyle(fontSize: 10)),
+                      const SizedBox(width: 2),
                       Text(
-                        _formatNumber(gameState.score),
+                        _formatNumber(gameState.highScore),
                         style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                          height: 1.1,
+                          color: Colors.white60,
+                          fontSize: 12,
                         ),
                       ),
                     ],
                   ),
-
-                  const Spacer(),
-
-                  // World ranking (right) - benchmark style
-                  _buildRankingDisplay(),
+                  Text(
+                    _formatNumber(gameState.score),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      height: 1.0,
+                    ),
+                  ),
                 ],
               ),
 
-              const SizedBox(height: 10),
+              const Spacer(),
 
-              // Row 2: Action buttons - benchmark exact layout
-              Row(
-                children: [
-                  // Left: Undo button
-                  _buildSquareButton(
-                    icon: Icons.undo,
-                    onTap: gameState.canUndo ? () => gameState.undo() : () {},
-                  ),
-                  const SizedBox(width: 8),
-                  // Left: Invite button with label
-                  _buildLabelButton(
-                    icon: Icons.person_add,
-                    label: '초대',
-                    onTap: () {
-                      Share.share('Number Drop 게임에 도전해보세요! 🎮');
-                    },
-                  ),
-
-                  const Spacer(),
-
-                  // Right: Premium button with label
-                  _buildLabelButton(
-                    icon: Icons.card_giftcard,
-                    label: '프리미엄',
-                    onTap: () {},
-                  ),
-                  const SizedBox(width: 8),
-                  // Right: Menu button with red dot
-                  _buildMenuButton(
-                    onTap: () => gameState.pause(),
-                  ),
-                ],
+              // Right: Ranking + Menu
+              _buildRankingDisplay(),
+              const SizedBox(width: 4),
+              _buildMiniButton(
+                icon: Icons.menu,
+                onTap: () => gameState.pause(),
+                showDot: true,
               ),
             ],
           ),
@@ -108,48 +75,36 @@ class ScoreDisplay extends StatelessWidget {
 
   Widget _buildCoinDisplay(int coins) {
     return Container(
-      height: 36,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+      height: 28,
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
       decoration: BoxDecoration(
         color: const Color(0xFF4A9FE8),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF2D6AB3), width: 2),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFF2D6AB3), width: 1.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Yellow coin circle
           Container(
-            width: 22,
-            height: 22,
+            width: 16,
+            height: 16,
             decoration: BoxDecoration(
               color: const Color(0xFFFFD700),
               shape: BoxShape.circle,
               border: Border.all(color: const Color(0xFFB8860B), width: 1),
             ),
             child: const Center(
-              child: Text('😊', style: TextStyle(fontSize: 12)),
+              child: Text('😊', style: TextStyle(fontSize: 9)),
             ),
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 4),
           Text(
             _formatNumber(coins),
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 18,
+              fontSize: 13,
               fontWeight: FontWeight.bold,
             ),
-          ),
-          const SizedBox(width: 4),
-          // Plus button
-          Container(
-            width: 18,
-            height: 18,
-            decoration: BoxDecoration(
-              color: const Color(0xFF7EC8F8),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.add, color: Colors.white, size: 14),
           ),
         ],
       ),
@@ -158,39 +113,31 @@ class ScoreDisplay extends StatelessWidget {
 
   Widget _buildRankingDisplay() {
     return Container(
-      height: 36,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+      height: 28,
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
       decoration: BoxDecoration(
         color: const Color(0xFF4A9FE8),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF2D6AB3), width: 2),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFF2D6AB3), width: 1.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 22,
-            height: 22,
+            width: 16,
+            height: 16,
             decoration: const BoxDecoration(
               color: Color(0xFF90EE90),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.public, color: Colors.white, size: 16),
+            child: const Icon(Icons.public, color: Colors.white, size: 11),
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 3),
           const Text(
-            '#',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const Text(
-            '4058421',
+            '#---',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 14,
+              fontSize: 11,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -199,80 +146,37 @@ class ScoreDisplay extends StatelessWidget {
     );
   }
 
-  Widget _buildSquareButton({required IconData icon, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 40,
-        decoration: BoxDecoration(
-          color: const Color(0xFF3D5A80),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icon, color: Colors.white, size: 24),
-      ),
-    );
-  }
-
-  Widget _buildLabelButton({
+  Widget _buildMiniButton({
     required IconData icon,
-    required String label,
     required VoidCallback onTap,
+    bool showDot = false,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 40,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        width: 28,
+        height: 28,
         decoration: BoxDecoration(
           color: const Color(0xFF3D5A80),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: Colors.white, size: 20),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMenuButton({required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 40,
-        decoration: BoxDecoration(
-          color: const Color(0xFF3D5A80),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(6),
         ),
         child: Stack(
           alignment: Alignment.center,
           children: [
-            const Icon(Icons.menu, color: Colors.white, size: 24),
-            Positioned(
-              right: 8,
-              top: 8,
-              child: Container(
-                width: 10,
-                height: 10,
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
+            Icon(icon, color: Colors.white, size: 16),
+            if (showDot)
+              Positioned(
+                right: 4,
+                top: 4,
+                child: Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),
