@@ -1,5 +1,6 @@
 # Number Drop Clone - 작업 내역서
 **작업일**: 2026-02-05
+**최종 수정**: 설정 기능 미구현 부분 수정
 
 ---
 
@@ -187,3 +188,67 @@ Future<Map<String, dynamic>> getDailyChallengeStats()
 
 4. **AdMob 프로덕션 ID**
    - `ad_service.dart`의 빈 프로덕션 ID 설정 필요
+
+5. **BGM 파일 추가 필요**
+   - `assets/audio/bgm.mp3` 및 `web/assets/audio/bgm.wav` 파일 필요
+
+---
+
+## 7. 설정 기능 미구현 부분 수정 (추가 작업)
+
+### 7.1 Vibration 기능 연결
+
+**문제점:** 설정은 있었으나 실제 게임에서 진동 함수가 호출되지 않음
+
+**수정 내용:**
+- `animated_game_board.dart`에 `VibrationService` import 추가
+- 블록 드롭 시 `vibrateLight()` 호출
+- 병합 시 `vibrateMedium()` 호출
+- 콤보 시 `vibrateStrong()` 호출
+- 높은 값 블록(512+) 생성 시 `vibratePattern()` 호출
+- 게임 오버 시 `vibrateGameOver()` 호출
+
+**변경 위치:** `_handleDrop()` 함수
+
+### 7.2 playHighValue() 호출 추가
+
+**문제점:** 높은 블록 생성 시 효과음이 재생되지 않음
+
+**수정 내용:**
+- 드롭 전/후 최고 블록 값 비교
+- 512 이상의 새 최고 블록 생성 시 `playHighValue()` 호출
+
+### 7.3 BGM 자동 재생 추가
+
+**문제점:** 게임 시작 시 BGM이 자동으로 재생되지 않음
+
+**수정 내용:**
+- `game_screen.dart`: `didChangeDependencies()`에서 `playBGM()` 호출
+- `daily_challenge_screen.dart`: `_startDailyChallenge()`에서 `playBGM()` 호출
+- `battle_screen.dart`: `_initBattle()`에서 `playBGM()` 호출
+- 각 화면 `dispose()`에서 `stopBGM()` 호출
+
+### 7.4 수정된 파일 목록
+
+| 파일 | 수정 내용 |
+|------|----------|
+| `animated_game_board.dart` | VibrationService import, 진동 호출 추가, playHighValue 호출 |
+| `game_screen.dart` | VibrationService import, BGM 재생/중지, 게임오버 진동 |
+| `daily_challenge_screen.dart` | VibrationService import, BGM 재생/중지, 게임오버 진동 |
+| `battle_screen.dart` | VibrationService import, BGM 재생/중지, 게임오버 진동 |
+
+### 7.5 진동 패턴 요약
+
+| 이벤트 | 진동 함수 | 설명 |
+|--------|----------|------|
+| 블록 드롭 | `vibrateLight()` | 20ms 짧은 진동 |
+| 블록 병합 | `vibrateMedium()` | 50ms 중간 진동 |
+| 콤보 달성 | `vibrateStrong()` | 100ms 강한 진동 |
+| 높은 블록 생성 | `vibratePattern()` | 패턴 진동 (50-50-50-50-100ms) |
+| 게임 오버 | `vibrateGameOver()` | 패턴 진동 (100-100-200ms) |
+
+### 7.6 남은 미해결 사항
+
+1. **BGM 파일 없음** - `bgm.mp3`, `bgm.wav` 파일을 직접 추가해야 함
+   - 무료 BGM 사이트에서 다운로드 후 추가 권장
+   - 파일 경로: `assets/audio/bgm.mp3`, `web/assets/audio/bgm.wav`

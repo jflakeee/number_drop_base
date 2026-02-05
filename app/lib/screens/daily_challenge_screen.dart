@@ -6,6 +6,7 @@ import '../config/constants.dart';
 import '../models/game_state.dart';
 import '../services/storage_service.dart';
 import '../services/audio_service.dart';
+import '../services/vibration_service.dart';
 import '../services/auth_service.dart';
 import '../services/ranking_service.dart';
 import '../widgets/animated_game_board.dart';
@@ -53,7 +54,16 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
       final gameState = context.read<GameState>();
       gameState.newDailyChallenge();
       _loadUserData();
+      // Start BGM
+      AudioService.instance.playBGM();
     }
+  }
+
+  @override
+  void dispose() {
+    // Stop BGM when leaving
+    AudioService.instance.stopBGM();
+    super.dispose();
   }
 
   Future<void> _loadUserData() async {
@@ -207,6 +217,7 @@ Seed: $seed
               _scoreSubmitted = false;
               _saveGameData(gameState);
               AudioService.instance.playGameOver();
+              VibrationService.instance.vibrateGameOver();
               _submitScore(gameState);
             }
             if (!gameState.isGameOver) {

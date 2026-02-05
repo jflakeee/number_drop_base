@@ -6,6 +6,7 @@ import '../config/game_settings.dart';
 import '../models/block.dart';
 import '../models/game_state.dart';
 import '../services/audio_service.dart';
+import '../services/vibration_service.dart';
 import '../services/settings_service.dart';
 import '../animations/easing_curves.dart';
 import '../animations/merge_effects/merge_effect_factory.dart';
@@ -105,24 +106,55 @@ class _AnimatedGameBoardState extends State<AnimatedGameBoard>
       _droppingColumn = column;
     });
 
-    // Play drop sound
+    // Play drop sound and light vibration
     AudioService.instance.playDrop();
+    VibrationService.instance.vibrateLight();
 
     final prevScore = gameState.score;
     final prevCombo = gameState.comboCount;
 
+    // Track highest block before drop to detect new high value blocks
+    int prevHighestBlock = 0;
+    for (int r = 0; r < GameConstants.rows; r++) {
+      for (int c = 0; c < GameConstants.columns; c++) {
+        final block = gameState.board[r][c];
+        if (block != null && block.value > prevHighestBlock) {
+          prevHighestBlock = block.value;
+        }
+      }
+    }
+
     // Drop the block immediately (no animation)
     await gameState.dropBlock(column);
+
+    // Check for new highest block (512 or higher)
+    int newHighestBlock = 0;
+    for (int r = 0; r < GameConstants.rows; r++) {
+      for (int c = 0; c < GameConstants.columns; c++) {
+        final block = gameState.board[r][c];
+        if (block != null && block.value > newHighestBlock) {
+          newHighestBlock = block.value;
+        }
+      }
+    }
+
+    // Play high value sound if new high block created (512+)
+    if (newHighestBlock > prevHighestBlock && newHighestBlock >= 512) {
+      AudioService.instance.playHighValue();
+      VibrationService.instance.vibratePattern();
+    }
 
     // Play merge sound if score changed (meaning merge happened)
     if (gameState.score > prevScore) {
       AudioService.instance.playMerge();
+      VibrationService.instance.vibrateMedium();
       _triggerShake();
     }
 
     // Play combo sound if combo increased
     if (gameState.comboCount > prevCombo && gameState.comboCount > 1) {
       AudioService.instance.playCombo(gameState.comboCount);
+      VibrationService.instance.vibrateStrong();
     }
 
     setState(() {

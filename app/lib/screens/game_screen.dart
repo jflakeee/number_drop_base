@@ -6,6 +6,7 @@ import '../config/constants.dart';
 import '../models/game_state.dart';
 import '../services/storage_service.dart';
 import '../services/audio_service.dart';
+import '../services/vibration_service.dart';
 import '../services/auth_service.dart';
 import '../services/ranking_service.dart';
 import '../services/offline_queue_service.dart';
@@ -44,7 +45,16 @@ class _GameScreenState extends State<GameScreen> {
       final gameState = context.read<GameState>();
       gameState.newGame();
       _loadUserData();
+      // Start BGM
+      AudioService.instance.playBGM();
     }
+  }
+
+  @override
+  void dispose() {
+    // Stop BGM when leaving game screen
+    AudioService.instance.stopBGM();
+    super.dispose();
   }
 
   Future<void> _loadUserData() async {
@@ -236,6 +246,7 @@ Can you beat my score? Try the same game with seed: $seed
               _scoreSubmitted = false;
               _saveGameData(gameState);
               AudioService.instance.playGameOver();
+              VibrationService.instance.vibrateGameOver();
               // Auto-submit score to ranking
               _submitScore(gameState);
             }
