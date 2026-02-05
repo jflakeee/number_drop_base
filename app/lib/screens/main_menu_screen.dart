@@ -5,6 +5,7 @@ import '../models/user_data.dart';
 import '../services/storage_service.dart';
 import '../services/offline_queue_service.dart';
 import 'game_screen.dart';
+import 'daily_challenge_screen.dart';
 import 'settings_screen.dart';
 import 'shop_screen.dart';
 import 'ranking_screen.dart';
@@ -22,12 +23,15 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   UserData _userData = UserData();
   bool _isLoading = true;
   bool _hasPendingScores = false;
+  int _dailyChallengeHighScore = 0;
+  bool _hasPlayedDailyChallenge = false;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
     _checkPendingScores();
+    _loadDailyChallengeStats();
   }
 
   Future<void> _loadUserData() async {
@@ -42,6 +46,16 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     final hasPending = await OfflineQueueService.instance.hasPendingScores();
     if (mounted) {
       setState(() => _hasPendingScores = hasPending);
+    }
+  }
+
+  Future<void> _loadDailyChallengeStats() async {
+    final stats = await StorageService.instance.getDailyChallengeStats();
+    if (mounted) {
+      setState(() {
+        _dailyChallengeHighScore = stats['highScore'] ?? 0;
+        _hasPlayedDailyChallenge = stats['played'] ?? false;
+      });
     }
   }
 
@@ -308,44 +322,117 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   Widget _buildPlayButton() {
-    return GestureDetector(
-      onTap: _startGame,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [GameColors.primary, Color(0xFF1976D2)],
-          ),
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: GameColors.primary.withOpacity(0.4),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.play_arrow,
-              color: Colors.white,
-              size: 32,
-            ),
-            SizedBox(width: 8),
-            Text(
-              'PLAY',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 4,
+    return Column(
+      children: [
+        // Main Play button
+        GestureDetector(
+          onTap: _startGame,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [GameColors.primary, Color(0xFF1976D2)],
               ),
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: GameColors.primary.withOpacity(0.4),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
-          ],
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.play_arrow,
+                  color: Colors.white,
+                  size: 32,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'PLAY',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 4,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      ),
+
+        const SizedBox(height: 16),
+
+        // Daily Challenge button
+        GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const DailyChallengeScreen()),
+            ).then((_) {
+              _loadUserData();
+              _loadDailyChallengeStats();
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFFF6B6B).withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.calendar_today,
+                  color: Colors.white,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'DAILY CHALLENGE',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
+                if (_hasPlayedDailyChallenge) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      _formatNumber(_dailyChallengeHighScore),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 

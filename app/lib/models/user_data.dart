@@ -7,6 +7,11 @@ class UserData {
   DateTime? lastPlayedAt;
   DateTime? lastDailyBonusAt;
 
+  // Daily Challenge fields
+  int? lastDailyChallengeSeed;
+  int dailyChallengeHighScore;
+  int dailyChallengePlays;
+
   UserData({
     this.highScore = 0,
     this.coins = 0,
@@ -14,6 +19,9 @@ class UserData {
     this.highestBlock = 2,
     this.lastPlayedAt,
     this.lastDailyBonusAt,
+    this.lastDailyChallengeSeed,
+    this.dailyChallengeHighScore = 0,
+    this.dailyChallengePlays = 0,
   });
 
   /// Create from JSON map
@@ -29,6 +37,9 @@ class UserData {
       lastDailyBonusAt: json['lastDailyBonusAt'] != null
           ? DateTime.parse(json['lastDailyBonusAt'])
           : null,
+      lastDailyChallengeSeed: json['lastDailyChallengeSeed'],
+      dailyChallengeHighScore: json['dailyChallengeHighScore'] ?? 0,
+      dailyChallengePlays: json['dailyChallengePlays'] ?? 0,
     );
   }
 
@@ -41,6 +52,9 @@ class UserData {
       'highestBlock': highestBlock,
       'lastPlayedAt': lastPlayedAt?.toIso8601String(),
       'lastDailyBonusAt': lastDailyBonusAt?.toIso8601String(),
+      'lastDailyChallengeSeed': lastDailyChallengeSeed,
+      'dailyChallengeHighScore': dailyChallengeHighScore,
+      'dailyChallengePlays': dailyChallengePlays,
     };
   }
 
@@ -52,5 +66,21 @@ class UserData {
     return now.year > lastBonus.year ||
         now.month > lastBonus.month ||
         now.day > lastBonus.day;
+  }
+
+  /// Get today's daily challenge seed
+  static int getTodaysSeed() {
+    final now = DateTime.now();
+    return now.year * 10000 + now.month * 100 + now.day;
+  }
+
+  /// Check if this is a new daily challenge (different day)
+  bool get isNewDailyChallenge {
+    return lastDailyChallengeSeed != getTodaysSeed();
+  }
+
+  /// Check if player has already played today's challenge
+  bool get hasPlayedTodaysChallenge {
+    return lastDailyChallengeSeed == getTodaysSeed() && dailyChallengePlays > 0;
   }
 }

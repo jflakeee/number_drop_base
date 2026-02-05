@@ -106,6 +106,55 @@ class StorageService {
     return bonusAmount;
   }
 
+  /// Record a daily challenge play and update best score
+  Future<bool> recordDailyChallengeScore(int score) async {
+    final userData = await loadUserData();
+    final todaysSeed = UserData.getTodaysSeed();
+
+    // Check if this is a new day
+    if (userData.lastDailyChallengeSeed != todaysSeed) {
+      // Reset for new day
+      userData.lastDailyChallengeSeed = todaysSeed;
+      userData.dailyChallengeHighScore = score;
+      userData.dailyChallengePlays = 1;
+      await saveUserData(userData);
+      return true; // New high score for today
+    } else {
+      // Same day - update plays count and check high score
+      userData.dailyChallengePlays++;
+      bool isNewHighScore = false;
+      if (score > userData.dailyChallengeHighScore) {
+        userData.dailyChallengeHighScore = score;
+        isNewHighScore = true;
+      }
+      await saveUserData(userData);
+      return isNewHighScore;
+    }
+  }
+
+  /// Get today's daily challenge stats
+  Future<Map<String, dynamic>> getDailyChallengeStats() async {
+    final userData = await loadUserData();
+    final todaysSeed = UserData.getTodaysSeed();
+
+    if (userData.lastDailyChallengeSeed != todaysSeed) {
+      // New day - no plays yet
+      return {
+        'played': false,
+        'plays': 0,
+        'highScore': 0,
+        'seed': todaysSeed,
+      };
+    }
+
+    return {
+      'played': userData.dailyChallengePlays > 0,
+      'plays': userData.dailyChallengePlays,
+      'highScore': userData.dailyChallengeHighScore,
+      'seed': todaysSeed,
+    };
+  }
+
   /// Clear all data (for testing)
   Future<void> clearAll() async {
     if (_prefs == null) await init();

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
-import '../config/colors.dart';
 import '../models/game_state.dart';
 
 /// Widget displaying score, high score, coins, and action buttons (benchmark exact style)
