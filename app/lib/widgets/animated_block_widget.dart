@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/block.dart';
 import '../config/block_themes.dart';
 import '../services/settings_service.dart';
+import 'block_widget.dart' show formatBlockValue, getBlockFontSize;
 
 /// Animated block widget with drop, merge, and glow effects
 class AnimatedBlockWidget extends StatefulWidget {
@@ -285,10 +286,10 @@ class _AnimatedBlockWidgetState extends State<AnimatedBlockWidget>
                 ),
               // Block value
               Text(
-                _formatValue(widget.block.value),
+                formatBlockValue(widget.block.value),
                 style: TextStyle(
                   color: widget.block.textColor,
-                  fontSize: _getFontSize(widget.block.value, widget.size),
+                  fontSize: getBlockFontSize(formatBlockValue(widget.block.value), widget.size),
                   fontWeight: FontWeight.bold,
                   shadows: [
                     Shadow(
@@ -358,20 +359,4 @@ class _AnimatedBlockWidgetState extends State<AnimatedBlockWidget>
     return null;
   }
 
-  String _formatValue(int value) {
-    if (value >= 1000000) {
-      return '${(value / 1000000).toStringAsFixed(1)}M';
-    } else if (value >= 1000) {
-      return '${(value / 1000).toStringAsFixed(value % 1000 == 0 ? 0 : 1)}K';
-    }
-    return value.toString();
-  }
-
-  double _getFontSize(int value, double size) {
-    final digits = value.toString().length;
-    if (digits <= 2) return size * 0.4;
-    if (digits <= 3) return size * 0.35;
-    if (digits <= 4) return size * 0.28;
-    return size * 0.22;
-  }
 }

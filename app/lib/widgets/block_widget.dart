@@ -3,6 +3,30 @@ import '../models/block.dart';
 import '../config/block_themes.dart';
 import '../services/settings_service.dart';
 
+/// Format block value with unit suffixes (k, m, g, t, p, e, z, y, r, q)
+/// No decimal points: 1000 → "1k", 1048576 → "1m"
+String formatBlockValue(int value) {
+  const units = ['', 'k', 'm', 'g', 't', 'p', 'e', 'z', 'y', 'r', 'q'];
+  if (value < 1000) return value.toString();
+
+  int unitIndex = 0;
+  int remaining = value;
+  while (remaining >= 1000 && unitIndex < units.length - 1) {
+    remaining = remaining ~/ 1000;
+    unitIndex++;
+  }
+  return '$remaining${units[unitIndex]}';
+}
+
+/// Get font size based on formatted string length
+double getBlockFontSize(String formatted, double size) {
+  final len = formatted.length;
+  if (len <= 2) return size * 0.4;
+  if (len <= 3) return size * 0.35;
+  if (len <= 4) return size * 0.28;
+  return size * 0.22;
+}
+
 /// Widget that displays a single block
 class BlockWidget extends StatelessWidget {
   final Block block;
@@ -96,10 +120,10 @@ class BlockWidget extends StatelessWidget {
                     ),
                   // Block value
                   Text(
-                    _formatValue(block.value),
+                    formatBlockValue(block.value),
                     style: TextStyle(
                       color: block.textColor,
-                      fontSize: _getFontSize(block.value, size),
+                      fontSize: getBlockFontSize(formatBlockValue(block.value), size),
                       fontWeight: FontWeight.bold,
                       shadows: [
                         Shadow(
@@ -116,20 +140,4 @@ class BlockWidget extends StatelessWidget {
     );
   }
 
-  String _formatValue(int value) {
-    if (value >= 1000000) {
-      return '${(value / 1000000).toStringAsFixed(1)}M';
-    } else if (value >= 1000) {
-      return '${(value / 1000).toStringAsFixed(value % 1000 == 0 ? 0 : 1)}K';
-    }
-    return value.toString();
-  }
-
-  double _getFontSize(int value, double size) {
-    final digits = value.toString().length;
-    if (digits <= 2) return size * 0.4;
-    if (digits <= 3) return size * 0.35;
-    if (digits <= 4) return size * 0.28;
-    return size * 0.22;
-  }
 }

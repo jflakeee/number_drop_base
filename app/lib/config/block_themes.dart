@@ -77,15 +77,15 @@ class BlockThemes {
     koreanName: '클래식',
     colors: {
       2: Color(0xFFE91E63),    // Pink/Magenta
-      4: Color(0xFF4CAF50),    // Green
+      4: Color(0xFF4DD0E1),    // Mint
       8: Color(0xFF26C6DA),    // Cyan/Teal
-      16: Color(0xFF2196F3),   // Blue
+      16: Color(0xFF7E57C2),   // Purple
       32: Color(0xFFFF7043),   // Orange
-      64: Color(0xFF9C27B0),   // Purple
-      128: Color(0xFF5BA4A4),  // Teal (darker)
+      64: Color(0xFF66BB6A),   // Green
+      128: Color(0xFF78909C),  // Blue Grey
       256: Color(0xFFEC407A),  // Bright Pink
-      512: Color(0xFF8BC34A),  // Light Green
-      1024: Color(0xFFFFEB3B), // Yellow
+      512: Color(0xFF66BB6A),  // Green
+      1024: Color(0xFF90A4AE), // Grey
       2048: Color(0xFFFF9800), // Orange/Gold
       4096: Color(0xFF9C27B0), // Purple
     },
