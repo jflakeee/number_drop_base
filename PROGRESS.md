@@ -3,8 +3,8 @@
 ## 프로젝트 개요
 - **게임명**: Number Drop Clone (Drop The Number: Merge Puzzle 클론)
 - **플랫폼**: Flutter Web
-- **배포 URL**: https://jflakeee.github.io/number_drop_clone/
-- **GitHub**: https://github.com/jflakeee/number_drop_clone
+- **배포 URL**: https://jflakeee.github.io/number_drop_base/
+- **GitHub**: https://github.com/jflakeee/number_drop_base
 
 ---
 
