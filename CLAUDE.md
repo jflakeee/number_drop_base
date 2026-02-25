@@ -27,7 +27,7 @@ flutter test
 flutter test test/widget_test.dart
 
 # Build web for GitHub Pages
-flutter build web --release --base-href "/number_drop_clone/"
+flutter build web --release --base-href "/number_drop_base/"
 
 # Build Android APK
 flutter build apk --release
