@@ -70,6 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.arrow_downward,
                   title: 'Drop Speed',
                   value: settings.dropDuration.toDouble(),
+                  defaultValue: GameSettings.defaultDropDuration.toDouble(),
                   min: GameSettings.minDuration.toDouble(),
                   max: GameSettings.maxDuration.toDouble(),
                   divisions: (GameSettings.maxDuration - GameSettings.minDuration) ~/ GameSettings.durationStep,
@@ -83,6 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.merge_type,
                   title: 'Merge Speed',
                   value: settings.mergeDuration.toDouble(),
+                  defaultValue: GameSettings.defaultMergeDuration.toDouble(),
                   min: GameSettings.minDuration.toDouble(),
                   max: GameSettings.maxDuration.toDouble(),
                   divisions: (GameSettings.maxDuration - GameSettings.minDuration) ~/ GameSettings.durationStep,
@@ -93,15 +95,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const SizedBox(height: 8),
                 _buildSliderTile(
-                  icon: Icons.downloading,
-                  title: 'Gravity Speed',
-                  value: settings.gravityDuration.toDouble(),
+                  icon: Icons.auto_awesome,
+                  title: 'Effect Speed',
+                  value: settings.effectDuration.toDouble(),
+                  defaultValue: GameSettings.defaultEffectDuration.toDouble(),
                   min: GameSettings.minDuration.toDouble(),
                   max: GameSettings.maxDuration.toDouble(),
                   divisions: (GameSettings.maxDuration - GameSettings.minDuration) ~/ GameSettings.durationStep,
                   suffix: 'ms',
                   onChanged: (value) {
-                    SettingsService.instance.setGravityDuration(value.toInt());
+                    SettingsService.instance.setEffectDuration(value.toInt());
                   },
                 ),
                 const SizedBox(height: 8),
@@ -308,7 +311,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required int divisions,
     required String suffix,
     required ValueChanged<double> onChanged,
+    required double defaultValue,
   }) {
+    final isDefault = value.toInt() == defaultValue.toInt();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -336,6 +341,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: const TextStyle(
                   color: Colors.white54,
                   fontSize: 14,
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: isDefault ? null : () => onChanged(defaultValue),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isDefault
+                        ? Colors.white.withOpacity(0.05)
+                        : GameColors.primary.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(6),
+                    border: isDefault
+                        ? null
+                        : Border.all(color: GameColors.primary.withOpacity(0.5), width: 1),
+                  ),
+                  child: Text(
+                    'D',
+                    style: TextStyle(
+                      color: isDefault ? Colors.white24 : GameColors.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],

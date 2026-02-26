@@ -57,6 +57,7 @@ class GameSettings {
   final int mergeDuration;
   final int mergeMoveDuration;
   final int gravityDuration;
+  final int effectDuration;
 
   // === Animation Types ===
   final EasingType easingType;
@@ -75,6 +76,7 @@ class GameSettings {
   static const int defaultMergeDuration = 250;
   static const int defaultMergeMoveDuration = 180;
   static const int defaultGravityDuration = 80;
+  static const int defaultEffectDuration = 300;
   static const EasingType defaultEasingType = EasingType.gravity;
   static const MergeAnimationType defaultMergeAnimation = MergeAnimationType.jelly;
   static const BlockTheme defaultBlockTheme = BlockTheme.classic;
@@ -92,6 +94,7 @@ class GameSettings {
     this.mergeDuration = defaultMergeDuration,
     this.mergeMoveDuration = defaultMergeMoveDuration,
     this.gravityDuration = defaultGravityDuration,
+    this.effectDuration = defaultEffectDuration,
     this.easingType = defaultEasingType,
     this.mergeAnimation = defaultMergeAnimation,
     this.blockTheme = defaultBlockTheme,
@@ -106,6 +109,7 @@ class GameSettings {
     int? mergeDuration,
     int? mergeMoveDuration,
     int? gravityDuration,
+    int? effectDuration,
     EasingType? easingType,
     MergeAnimationType? mergeAnimation,
     BlockTheme? blockTheme,
@@ -118,6 +122,7 @@ class GameSettings {
       mergeDuration: mergeDuration ?? this.mergeDuration,
       mergeMoveDuration: mergeMoveDuration ?? this.mergeMoveDuration,
       gravityDuration: gravityDuration ?? this.gravityDuration,
+      effectDuration: effectDuration ?? this.effectDuration,
       easingType: easingType ?? this.easingType,
       mergeAnimation: mergeAnimation ?? this.mergeAnimation,
       blockTheme: blockTheme ?? this.blockTheme,
@@ -134,6 +139,7 @@ class GameSettings {
       'mergeDuration': mergeDuration,
       'mergeMoveDuration': mergeMoveDuration,
       'gravityDuration': gravityDuration,
+      'effectDuration': effectDuration,
       'easingType': easingType.name,
       'mergeAnimation': mergeAnimation.name,
       'blockTheme': blockTheme.name,
@@ -167,6 +173,12 @@ class GameSettings {
       gravityDuration: _parseIntWithDefault(
         json['gravityDuration'],
         defaultGravityDuration,
+        minDuration,
+        maxDuration,
+      ),
+      effectDuration: _parseIntWithDefault(
+        json['effectDuration'],
+        defaultEffectDuration,
         minDuration,
         maxDuration,
       ),
@@ -227,6 +239,7 @@ class GameSettings {
         other.mergeDuration == mergeDuration &&
         other.mergeMoveDuration == mergeMoveDuration &&
         other.gravityDuration == gravityDuration &&
+        other.effectDuration == effectDuration &&
         other.easingType == easingType &&
         other.mergeAnimation == mergeAnimation &&
         other.blockTheme == blockTheme &&
@@ -242,6 +255,7 @@ class GameSettings {
       mergeDuration,
       mergeMoveDuration,
       gravityDuration,
+      effectDuration,
       easingType,
       mergeAnimation,
       blockTheme,

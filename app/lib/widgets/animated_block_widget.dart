@@ -55,9 +55,9 @@ class _AnimatedBlockWidgetState extends State<AnimatedBlockWidget>
       CurvedAnimation(parent: _dropController, curve: Curves.easeOut),
     );
 
-    // Merge animation controller
+    // Merge animation controller (uses effect speed)
     _mergeController = AnimationController(
-      duration: Duration(milliseconds: SettingsService.instance.mergeDuration),
+      duration: Duration(milliseconds: SettingsService.instance.effectDuration),
       vsync: this,
     );
 

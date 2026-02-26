@@ -30,6 +30,7 @@ class SettingsService extends ChangeNotifier {
   int get mergeDuration => _settings.mergeDuration;
   int get mergeMoveDuration => _settings.mergeMoveDuration;
   int get gravityDuration => _settings.gravityDuration;
+  int get effectDuration => _settings.effectDuration;
   EasingType get easingType => _settings.easingType;
   MergeAnimationType get mergeAnimation => _settings.mergeAnimation;
   BlockTheme get blockTheme => _settings.blockTheme;
@@ -114,6 +115,11 @@ class SettingsService extends ChangeNotifier {
   Future<void> setGravityDuration(int value) async {
     final clamped = value.clamp(GameSettings.minDuration, GameSettings.maxDuration);
     await updateSettings(_settings.copyWith(gravityDuration: clamped));
+  }
+
+  Future<void> setEffectDuration(int value) async {
+    final clamped = value.clamp(GameSettings.minDuration, GameSettings.maxDuration);
+    await updateSettings(_settings.copyWith(effectDuration: clamped));
   }
 
   Future<void> setEasingType(EasingType value) async {
