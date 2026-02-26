@@ -80,7 +80,7 @@ class GameSettings {
   static const BlockTheme defaultBlockTheme = BlockTheme.classic;
   static const bool defaultAllowDropDuringMerge = false;
   static const bool defaultShowGhostBlock = true;
-  static const bool defaultScreenShakeEnabled = true;
+  static const bool defaultScreenShakeEnabled = false;
 
   // === Duration Limits ===
   static const int minDuration = 0;
