@@ -290,7 +290,7 @@ Can you beat my score? Try the same game with seed: $seed
                     // Bottom controls (compact)
                     _buildBottomControls(context, gameState),
 
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 16),
                   ],
                 ),
 

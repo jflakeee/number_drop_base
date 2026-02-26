@@ -127,7 +127,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         // Bottom buttons
         _buildBottomButtons(),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 40),
       ],
     );
   }

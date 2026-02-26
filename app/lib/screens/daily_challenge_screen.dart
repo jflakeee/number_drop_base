@@ -261,7 +261,7 @@ Seed: $seed
                     // Bottom controls
                     _buildBottomControls(context, gameState),
 
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 16),
                   ],
                 ),
 
